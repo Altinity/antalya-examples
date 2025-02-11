@@ -1,0 +1,30 @@
+<clickhouse>
+    <remote_servers>
+        <!-- User-specified clusters -->
+        <initiator>
+            <shard>
+                <internal_replication>true</internal_replication>
+                <replica>
+                    <host>clickhouse</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </initiator>
+        <swarm>
+            <shard>
+                <internal_replication>true</internal_replication>
+                <replica>
+                    <host>swarm-1</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+            <shard>
+                <internal_replication>true</internal_replication>
+                <replica>
+                    <host>swarm-2</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </swarm>
+    </remote_servers>
+</clickhouse>

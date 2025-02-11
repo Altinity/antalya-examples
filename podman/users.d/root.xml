@@ -1,0 +1,22 @@
+<clickhouse>
+    <!-- Users and ACL. -->
+    <users>
+        <root>
+            <!-- Password value: topsecret --> 
+            <password_sha256_hex>53336a676c64c1396553b2b7c92f38126768827c93b64d9142069c10eda7a721</password_sha256_hex>
+            <networks> <ip>::/0</ip> </networks>
+
+            <!-- Settings profile for user. -->
+            <profile>default</profile>
+
+            <!-- Quota for user. -->
+            <quota>default</quota>
+
+            <!-- User can create other users and grant rights to them. -->
+            <access_management>1</access_management>
+
+            <!-- User can manipulate named collections. -->
+            <named_collection_control>1</named_collection_control>
+        </root>
+    </users>
+</clickhouse>

@@ -3,7 +3,7 @@ services:
   spark-iceberg:
     image: tabulario/spark-iceberg
     container_name: spark-iceberg
-    build: spark/
+    #build: spark/
     depends_on:
       - rest
       - minio
@@ -40,6 +40,7 @@ services:
       - AWS_ACCESS_KEY_ID=minio
       - AWS_SECRET_ACCESS_KEY=minio123
       - AWS_REGION=us-east-1
+      - CLICKHOUSE_PASSWORD=antalyapass
   swarm-1:
     #image: clickhouse:24.12.3.47
     image: altinity/clickhouse-server:24.12.2.20101.altinityantalya
