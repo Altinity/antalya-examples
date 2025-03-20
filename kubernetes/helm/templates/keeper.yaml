@@ -1,0 +1,33 @@
+apiVersion: "clickhouse-keeper.altinity.com/v1"
+kind: "ClickHouseKeeperInstallation"
+metadata:
+  name: "keeper"
+spec:
+  configuration:
+    clusters:
+      - name: "example"
+        layout:
+          replicasCount: {{ .Values.keeper.replicasCount }}
+  defaults:
+    templates:
+      podTemplate: default
+      dataVolumeClaimTemplate: default
+  templates:
+    podTemplates:
+      - name: default
+        spec:
+          containers:
+            - name: clickhouse-keeper
+              imagePullPolicy: {{ .Values.keeper.image.pullPolicy }}
+              image: "{{ .Values.keeper.image.repository }}:{{ .Values.keeper.image.tag }}"
+    volumeClaimTemplates:
+      - name: default
+        metadata:
+          name: both-paths
+        spec:
+          storageClassName: {{ if .Values.keeper.storage.class }}{{ .Values.keeper.storage.class }}{{ else }}{{ .Values.global.storageClass }}{{ end }}
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: {{ .Values.keeper.storage.size }}

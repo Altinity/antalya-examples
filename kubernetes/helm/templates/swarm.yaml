@@ -1,0 +1,73 @@
+apiVersion: "clickhouse.altinity.com/v1"
+kind: "ClickHouseInstallation"
+metadata:
+  name: "swarm"
+spec:
+  configuration:
+    clusters:
+      - name: "example"
+        layout:
+          replicas:
+          - templates:
+              podTemplate: replica
+              volumeClaimTemplate: storage
+          shardsCount: {{ .Values.swarm.shardsCount }}
+        templates:
+    zookeeper:
+        nodes:
+        - host: keeper-keeper
+          port: 2181
+    files:
+      config.d/remote_servers.xml: |
+        <clickhouse>
+          <allow_experimental_cluster_discovery>1</allow_experimental_cluster_discovery>
+          <remote_servers>
+            <!-- Swarm cluster built using remote discovery. -->
+            <swarm>
+              <discovery>
+                <path>/clickhouse/discovery/swarm</path>
+                <secret>secret_key</secret>
+              </discovery>
+            </swarm>
+          </remote_servers>
+        </clickhouse>
+  templates:
+    podTemplates:
+      - name: replica
+        spec:
+{{ if .Values.swarm.replicas.nodeSelector }}
+          nodeSelector:
+{{ toYaml .Values.swarm.replicas.nodeSelector | indent 12 }}
+{{ end }}
+{{ if .Values.swarm.replicas.tolerations }}
+          tolerations:
+{{ toYaml .Values.swarm.replicas.tolerations | indent 12 }}
+{{ end }}
+{{ if .Values.swarm.replicas.affinity }}
+          affinity:
+            # Specify Pod anti-affinity to Pods with the same label "/app" on the same "hostname"
+            podAntiAffinity:
+{{ toYaml .Values.swarm.replicas.affinity.podAntiAffinity | indent 14 }}
+{{ end }}
+          containers:
+          - name: clickhouse
+            image: {{ .Values.swarm.image.repository }}:{{ .Values.swarm.image.tag }}
+    volumeClaimTemplates:
+      - name: storage
+        # Uncomment for prod systems. You will then need to delete PVCs manually. 
+        # reclaimPolicy: Retain
+        spec:
+          {{- $storageClass := "" }}
+          {{- if .Values.swarm.replicas.storage.class }}
+          {{- $storageClass = .Values.swarm.replicas.storage.class }}
+          {{- else }}
+          {{- $storageClass = .Values.global.storageClass }}
+          {{- end }}
+          {{- if $storageClass }}
+          storageClassName: {{ $storageClass }}
+          {{- end }}
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: {{ .Values.swarm.replicas.storage.size }}
