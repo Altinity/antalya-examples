@@ -1,6 +1,6 @@
 # Global settings
 global:
-  storageClass: ""
+  storageClass: "gp3-encrypted"
 
 # ClickHouse Keeper settings
 keeper:
@@ -23,13 +23,13 @@ vector:
     storage:
       class: ""  # Defaults to global.storageClass if empty
       size: "50Gi"
-    # nodeSelector:
-    #   "node.kubernetes.io/instance-type": "m6i.large"
-    # tolerations:
-    #   - key: "dedicated"
-    #     operator: "Equal"
-    #     value: "clickhouse"
-    #     effect: "NoSchedule"
+    nodeSelector:
+      "node.kubernetes.io/instance-type": "m6i.large"
+    tolerations:
+      - key: "dedicated"
+        operator: "Equal"
+        value: "clickhouse"
+        effect: "NoSchedule"
   image:
     repository: "altinity/clickhouse-server"
     tag: "24.12.2.20203.altinityantalya"
@@ -37,33 +37,33 @@ vector:
 # ClickHouse Swarm settings
 swarm:
   enabled: true
-  shardsCount: 2
+  shardsCount: 1
   replicas:
     count: 1
     storage:
       class: ""  # Defaults to global.storageClass if empty
       size: "50Gi"
-    # nodeSelector:
-    #   "node.kubernetes.io/instance-type": "m6i.xlarge"
-    # tolerations:
-    #   - key: "antalya"
-    #     operator: "Equal"
-    #     value: "swarm"
-    #     effect: "NoSchedule"
-    #   - key: "dedicated"
-    #     operator: "Equal"
-    #     value: "clickhouse"
-    #     effect: "NoSchedule"
-    # affinity:
-    #   podAntiAffinity:
-    #     requiredDuringSchedulingIgnoredDuringExecution:
-    #       - labelSelector:
-    #           matchExpressions:
-    #             - key: "clickhouse.altinity.com/app"
-    #               operator: In
-    #               values:
-    #                 - "chop"
-    #         topologyKey: "kubernetes.io/hostname"
+    nodeSelector:
+      "node.kubernetes.io/instance-type": "m6i.xlarge"
+    tolerations:
+      - key: "antalya"
+        operator: "Equal"
+        value: "swarm"
+        effect: "NoSchedule"
+      - key: "dedicated"
+        operator: "Equal"
+        value: "clickhouse"
+        effect: "NoSchedule"
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: "clickhouse.altinity.com/app"
+                  operator: In
+                  values:
+                    - "chop"
+            topologyKey: "kubernetes.io/hostname"
   image:
     repository: "altinity/clickhouse-server"
     tag: "24.12.2.20203.altinityantalya"
