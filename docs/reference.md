@@ -182,3 +182,87 @@ use this Keeper ensemble for auto-discovery.
 
 This is in addition to the settings described in previous sections, 
 which remain the same. 
+
+## Configuring Caches
+
+Caches make a major difference in the performance of ClickHouse queries. This 
+section describes how to configure them in a swarm cluster. 
+
+### S3 Filesystem Cache
+
+This cache stores blocks read from object storage on local disk. It offers 
+a considerable speed advantage, especially when blocks are in storage. The 
+S3 filesystem cache requires special configuration each swarm host. 
+
+#### Define the cache
+
+Add a definition like the following to /etc/clickhouse/filesystem_cache.xml 
+to set up a filesystem cache. 
+
+```
+spec:                                                                          
+  configuration:
+    files:
+      config.d/filesystem_cache.xml: |
+        <clickhouse>
+          <filesystem_caches>
+            <s3_parquet_cache>
+              <path>/var/lib/clickhouse/s3_parquet_cache</path>
+              <max_size>50Gi</max_size>
+            </s3_parquet_cache>
+          </filesystem_caches>
+        </clickhouse>
+```
+
+#### Enable cache use in queries
+
+The following settings control use of the cache. 
+
+* enable_filesystem_cache - Enable filesystem cache (1=enabled)
+* enable_filesystem_cache_log - Enable logging of cache operations (1=enabled)
+* filesystem_cache_name - Name of the cache to use (must be specified)
+
+You can enable the settings on a query as follows:
+
+```
+SELECT date, sum(output_count)
+FROM s3('s3://aws-public-blockchain/v1.0/btc/transactions/**.parquet', NOSIGN)
+WHERE date >= '2025-01-01' GROUP BY date ORDER BY date ASC
+SETTINGS use_hive_partitioning = 1, object_storage_cluster = 'swarm',
+enable_filesystem_cache = 1, filesystem_cache_name = 's3_parquet_cache'
+```
+
+You can also set cache values in user profiles as shown by the following 
+settings in Altinity operator format:
+
+```
+spec:
+  configuration:
+    profiles:
+      use_cache/enable_filesystem_cache: 1
+      use_cache/enable_filesystem_cache_log: 1
+      use_cache/filesystem_cache_name: "s3_parquet_cache"
+```
+
+#### Clear cache
+
+Issue the following command on any swarm server. (It does not work from 
+other clusters.)
+
+```
+SYSTEM DROP FILESYSTEM CACHE ON CLUSTER 'swarm'
+```
+
+#### Find out how the cache is doing. 
+
+Get statistics on file system caches across the swarm. 
+
+```
+SELECT hostName() host, cache_name, count() AS segments, sum(size) AS size,
+    min(cache_hits) AS min_hits, avg(cache_hits) AS avg_hits,
+    max(cache_hits) AS max_hits
+FROM clusterAllReplicas('swarm', system.filesystem_cache)
+GROUP BY host, cache_name
+ORDER BY host, cache_name ASC
+FORMAT Vertical
+```

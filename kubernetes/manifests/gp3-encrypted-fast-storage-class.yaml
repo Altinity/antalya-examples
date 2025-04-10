@@ -1,0 +1,16 @@
+# Storage class for fast GP3 volumes. 
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gp3-encrypted-fast
+provisioner: ebs.csi.aws.com
+parameters:
+  encrypted: "true"
+  fsType: ext4
+  throughput: "1000"
+  iops: "3000"
+  type: gp3
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+

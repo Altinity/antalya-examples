@@ -58,31 +58,34 @@ Try running a query using only the vector server.
 ```
 SELECT date, sum(output_count)
 FROM s3('s3://aws-public-blockchain/v1.0/btc/transactions/**.parquet', NOSIGN)
-WHERE date >= '2024-01-01' GROUP BY date ORDER BY date ASC
+WHERE date >= '2025-01-01' GROUP BY date ORDER BY date ASC
 SETTINGS use_hive_partitioning = 1
 ```
 
-This query will likely do nothing for a long time. Typical response time is about 
-120 seconds. You can cancel it using ^C.  
+This query sets the baseline for execution without assistance from the swarm. 
+Depending on the date range you use it is likely to be slow. You can cancel
+using ^C. 
 
-Next let's try a query using the swarm. The object_storage_cluster
+Next, let's try a query using the swarm. The object_storage_cluster
 setting points to the swarm cluster name.
+
 ```
 SELECT date, sum(output_count)
 FROM s3('s3://aws-public-blockchain/v1.0/btc/transactions/**.parquet', NOSIGN)
-WHERE date >= '2024-01-01' GROUP BY date ORDER BY date ASC
+WHERE date >= '2025-01-01' GROUP BY date ORDER BY date ASC
 SETTINGS use_hive_partitioning = 1, object_storage_cluster = 'swarm';
-
-SELECT date, sum(output_count)
-FROM s3('s3://aws-public-blockchain/v1.0/btc/transactions/**.parquet', NOSIGN)
-WHERE date >= '2024-01-01' GROUP BY date ORDER BY date ASC
-SETTINGS use_hive_partitioning = 1, object_storage_cluster = 'swarm',
-input_format_parquet_use_metadata_cache = 1;
 ```
 
-This query should complete in around 15 seconds with 4 swarm server
-hosts using m6i.xlarge VMs. Successive queries will complete somewhat
-faster due to caching.
+The next query shows results when caches are turned on. 
+```
+SELECT date, sum(output_count)
+FROM s3('s3://aws-public-blockchain/v1.0/btc/transactions/**.parquet', NOSIGN)
+WHERE date >= '2025-01-01' GROUP BY date ORDER BY date ASC
+SETTINGS use_hive_partitioning = 1, object_storage_cluster = 'swarm',
+input_format_parquet_use_metadata_cache = 1, enable_filesystem_cache = 1;
+```
+
+Successive queries will complete somewhat faster due to caching.
 
 Next, increase the size of the swarm server by directly editing the
 swarm CHI resource, changing the number of shards to 8, and submitting
