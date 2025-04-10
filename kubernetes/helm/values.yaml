@@ -1,0 +1,69 @@
+# Global settings
+global:
+  storageClass: "gp3-encrypted"
+
+# ClickHouse Keeper settings
+keeper:
+  enabled: true
+  replicasCount: 3
+  storage:
+    class: ""  # Defaults to global.storageClass if empty
+    size: "25Gi"
+  image:
+    repository: "altinity/clickhouse-keeper"
+    tag: "24.12.2.20203.altinityantalya"
+    pullPolicy: "IfNotPresent"
+
+# ClickHouse Vector settings
+vector:
+  enabled: true
+  shardsCount: 1
+  replicas:
+    count: 1
+    storage:
+      class: ""  # Defaults to global.storageClass if empty
+      size: "50Gi"
+    nodeSelector:
+      "node.kubernetes.io/instance-type": "m6i.large"
+    tolerations:
+      - key: "dedicated"
+        operator: "Equal"
+        value: "clickhouse"
+        effect: "NoSchedule"
+  image:
+    repository: "altinity/clickhouse-server"
+    tag: "24.12.2.20203.altinityantalya"
+
+# ClickHouse Swarm settings
+swarm:
+  enabled: true
+  shardsCount: 1
+  replicas:
+    count: 1
+    storage:
+      class: ""  # Defaults to global.storageClass if empty
+      size: "50Gi"
+    nodeSelector:
+      "node.kubernetes.io/instance-type": "m6i.xlarge"
+    tolerations:
+      - key: "antalya"
+        operator: "Equal"
+        value: "swarm"
+        effect: "NoSchedule"
+      - key: "dedicated"
+        operator: "Equal"
+        value: "clickhouse"
+        effect: "NoSchedule"
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: "clickhouse.altinity.com/app"
+                  operator: In
+                  values:
+                    - "chop"
+            topologyKey: "kubernetes.io/hostname"
+  image:
+    repository: "altinity/clickhouse-server"
+    tag: "24.12.2.20203.altinityantalya"

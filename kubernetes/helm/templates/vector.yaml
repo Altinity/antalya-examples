@@ -1,0 +1,73 @@
+apiVersion: "clickhouse.altinity.com/v1"
+kind: "ClickHouseInstallation"
+metadata:
+  name: "vector"
+spec:
+  configuration:
+    clusters:
+      - name: "example"
+        layout:
+          replicas:
+          - templates:
+              podTemplate: replica
+              volumeClaimTemplate: storage
+          shardsCount: {{ .Values.vector.shardsCount }}
+        templates:
+    zookeeper:
+        nodes:
+        - host: keeper-keeper
+          port: 2181
+    files:
+      config.d/remote_servers.xml: |
+        <clickhouse>
+          <allow_experimental_cluster_discovery>1</allow_experimental_cluster_discovery>
+          <remote_servers>
+            <!-- Swarm cluster built using remote discovery. -->
+            <swarm>
+              <discovery>
+                <path>/clickhouse/discovery/swarm</path>
+                <secret>secret_key</secret>
+                <!-- Use but do not join cluster. -->
+                <observer>true</observer>
+              </discovery>
+            </swarm>
+          </remote_servers>
+        </clickhouse>
+  templates:
+    podTemplates:
+      - name: replica
+        spec:
+{{ if .Values.vector.replicas.nodeSelector }}
+          nodeSelector:
+{{ toYaml .Values.vector.replicas.nodeSelector | indent 12 }}
+{{ end }}
+{{ if .Values.vector.replicas.tolerations }}
+          tolerations:
+{{ toYaml .Values.vector.replicas.tolerations | indent 12 }}
+{{ end }}
+{{ if .Values.vector.replicas.affinity }}
+          affinity:
+{{ toYaml .Values.vector.replicas.affinity | indent 12 }}
+{{ end }}
+          containers:
+          - name: clickhouse
+            image: {{ .Values.vector.image.repository }}:{{ .Values.vector.image.tag }}
+    volumeClaimTemplates:
+      - name: storage
+        # Uncomment for prod systems. You will then need to delete PVCs manually.
+        # reclaimPolicy: Retain
+        spec:
+          {{- $storageClass := "" }}
+          {{- if .Values.vector.replicas.storage.class }}
+          {{- $storageClass = .Values.vector.replicas.storage.class }}
+          {{- else }}
+          {{- $storageClass = .Values.global.storageClass }}
+          {{- end }}
+          {{- if $storageClass }}
+          storageClassName: {{ $storageClass }}
+          {{- end }}
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: {{ .Values.vector.replicas.storage.size }}

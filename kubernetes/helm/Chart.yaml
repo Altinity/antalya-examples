@@ -1,0 +1,16 @@
+apiVersion: v2
+name: clickhouse-antalya
+version: 0.1.0
+description: A Helm chart for deploying Antalya builds of ClickHouse
+type: application
+appVersion: "24.12.2.20101"
+home: https://github.com/Altinity/antalya-examples
+maintainers:
+  - name: Altinity
+    url: https://altinity.com
+sources:
+  - https://github.com/Altinity/antalya-examples
+dependencies: []
+annotations:
+  category: Database
+  licenses: Apache-2.0

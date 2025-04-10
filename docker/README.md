@@ -37,8 +37,9 @@ pip install --upgrade pip
 pip install pyarrow pyiceberg pandas
 ```
 
-Add data. 
+Start Docker + Add data. 
 ```
+docker compose up -d
 python iceberg_setup.py
 ```
 
