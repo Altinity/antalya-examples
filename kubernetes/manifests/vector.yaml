@@ -1,3 +1,4 @@
+# Vector cluster used to initiate queries. 
 apiVersion: "clickhouse.altinity.com/v1"
 kind: "ClickHouseInstallation"
 metadata:
@@ -41,7 +42,7 @@ spec:
             node.kubernetes.io/instance-type: m6i.large
           containers:
           - name: clickhouse
-            image: altinity/clickhouse-server:24.12.2.20203.altinityantalya
+            image: altinity/clickhouse-server:25.2.2.27660.altinityantalya
           tolerations:
           - key: "dedicated"
             operator: "Equal"

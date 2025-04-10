@@ -1,3 +1,4 @@
+# Keeper ensemble resource. Used for registration of swarm clusters. 
 apiVersion: "clickhouse-keeper.altinity.com/v1"
 kind: "ClickHouseKeeperInstallation"
 metadata:
@@ -19,7 +20,7 @@ spec:
           containers:
             - name: clickhouse-keeper
               imagePullPolicy: IfNotPresent
-              image: "altinity/clickhouse-keeper:24.12.2.20203.altinityantalya"
+              image: "altinity/clickhouse-keeper:25.2.2.27660.altinityantalya"
     volumeClaimTemplates:
       - name: default
         metadata:
