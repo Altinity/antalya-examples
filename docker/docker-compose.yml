@@ -25,23 +25,22 @@ services:
       - CATALOG_WAREHOUSE=s3://iceberg_data/
       - CATALOG_IO__IMPL=org.apache.iceberg.aws.s3.S3FileIO
       - CATALOG_S3_ENDPOINT=http://minio:9000
-  antalya:
-    #image: clickhouse:24.12.3.47
-    image: altinity/clickhouse-server:24.12.2.20203.altinityantalya
-    container_name: antalya
-    hostname: antalya
+  vector:
+    image: altinity/clickhouse-server:25.2.2.27660.altinityantalya
+    container_name: vector
+    hostname: vector
     ports:
       - 9000:9000
     volumes:
-      - ./config.d/antalya:/etc/clickhouse-server/config.d
+      - ./config.d/vector:/etc/clickhouse-server/config.d
       - ./users.d:/etc/clickhouse-server/users.d
-      - ./logs/antalya:/var/log/clickhouse-server
+      - ./logs/vector:/var/log/clickhouse-server
     environment:
       - AWS_ACCESS_KEY_ID=minio
       - AWS_SECRET_ACCESS_KEY=minio123
       - AWS_REGION=us-east-1
   keeper:
-    image: altinity/clickhouse-keeper:24.12.2.20203.altinityantalya
+    image: altinity/clickhouse-keeper:25.2.2.27660.altinityantalya
     container_name: keeper
     hostname: keeper
     ports:
@@ -51,8 +50,7 @@ services:
       - ./config.d/keeper:/etc/clickhouse-keeper/keeper_config.d
       - ./logs/keeper:/var/log/clickhouse-keeper
   swarm-1:
-    #image: clickhouse:24.12.3.47
-    image: altinity/clickhouse-server:24.12.2.20203.altinityantalya
+    image: altinity/clickhouse-server:25.2.2.27660.altinityantalya
     container_name: swarm-1
     hostname: swarm-1
     volumes:
@@ -64,8 +62,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=minio123
       - AWS_REGION=us-east-1
   swarm-2:
-    #image: clickhouse:24.12.3.47
-    image: altinity/clickhouse-server:24.12.2.20203.altinityantalya
+    image: altinity/clickhouse-server:25.2.2.27660.altinityantalya
     container_name: swarm-2
     hostname: swarm-2
     volumes:

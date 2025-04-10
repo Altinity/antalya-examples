@@ -29,6 +29,7 @@
         </swarm>
         <!-- Cluster containing all servers to enable query across every replica -->
         <all>
+            <secret>secret_key</secret>
             <shard>
                 <internal_replication>true</internal_replication>
                 <replica>

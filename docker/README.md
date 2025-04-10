@@ -37,9 +37,8 @@ pip install --upgrade pip
 pip install pyarrow pyiceberg pandas
 ```
 
-Start Docker + Add data. 
+Add data. 
 ```
-docker compose up -d
 python iceberg_setup.py
 ```
 
@@ -47,16 +46,16 @@ python iceberg_setup.py
 
 Connect to the Antalya server container and start clickhouse-client.
 ```
-docker exec -it antalya clickhouse-client
+docker exec -it vector clickhouse-client
 ```
 
 Confirm you are connected to Antalya. 
 ```
 SELECT version()
 
-   ┌─version()─────────────────────┐
-1. │ 24.12.2.20101.altinityantalya │
-   └───────────────────────────────┘
+   ┌─version()────────────────────┐
+1. │ 25.2.2.27660.altinityantalya │
+   └──────────────────────────────┘
 ```
 
 Select directly from S3 data using the swarm cluster. 
@@ -108,7 +107,7 @@ if you have other Docker applications running.
 
 Connect to Antalya, Spark, and Iceberg REST containers. 
 ```
-docker exec -it antalya /bin/bash
+docker exec -it vector /bin/bash
 docker exec -it spark-iceberg /bin/bash
 docker exec -it iceberg-rest /bin/bash
 ```
@@ -154,9 +153,9 @@ First, make sure you are talking to an Antalya build.
 ```
 SELECT version()
 
-   ┌─version()─────────────────────┐
-1. │ 24.12.2.20101.altinityantalya │
-   └───────────────────────────────┘
+   ┌─version()────────────────────┐
+1. │ 25.2.2.27660.altinityantalya │
+   └──────────────────────────────┘
 ```
 
 You can dispatch queries to the Antalya swarm cluster using s3() 
