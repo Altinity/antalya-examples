@@ -11,9 +11,10 @@ parts of an Antalya installation.
 
 ## ClickHouse Compatibility
 
-Antalya builds are based on upstream ClickHouse and follow ClickHouse 
-versioning. They are intended as drop-in replacements for the 
-matching ClickHouse version as well as Altinity Stable Builds. 
+Antalya builds are based on upstream ClickHouse and follow ClickHouse
+versioning. They are drop-in replacements for the matching ClickHouse
+version. They are built using the same CI/CD pipelines as Altinity
+Stable Builds.
 
 ## Iceberg, Parquet, and Object Storage
 
@@ -54,8 +55,8 @@ can use the path.
 
 ### Hive and Plain S3
 
-Antalya can also read data directly from S3 as well as Hive format. 
-The capabilities are largely identical to upstream ClickHouse. 
+Antalya can also read Parquet data directly from S3 as well as Hive
+format.  The capabilities are largely identical to upstream ClickHouse.
 
 ## Swarm Clusters
 

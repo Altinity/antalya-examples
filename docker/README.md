@@ -202,19 +202,21 @@ under it. There will be trouble if it contains more than one table.
 
 #### Query on Iceberg tables using Antalya swarm cluster
 
-(Partially works in Antalya build 24.12.2.20101. )
+You can use swarm clusters with the iceberg table function. Here 
+is an example. 
 
-You can use the swarm cluster also with the iceberg table function. Here 
-is an example. To get this to work you must use the icebergS3Cluster()
-function. 
+SELECT count()
+FROM iceberg('http://minio:9000/warehouse/data')
+SETTINGS object_storage_cluster='swarm'
+
+The icebergS3Cluster() function does the same thing but has different 
+syntax. 
 ```
 SELECT hostName() AS host, count()
 FROM icebergS3Cluster('swarm', 'http://minio:9000/warehouse/data')
 GROUP BY host
 SETTINGS object_storage_cluster = 'swarm'
 ```
-
-This will work with regular iceberg() table functions in the next build. 
 
 #### Query using the Iceberg REST catalog
 
@@ -234,6 +236,14 @@ SHOW TABLES from datalake
 SELECT count() FROM datalake.`iceberg.bids`
 ;
 SELECT * FROM datalake.`iceberg.bids`
+;
+```
+
+You can accelerate queries using the swarm using the same settings used 
+for queries directly on S3. 
+```
+SELECT count() from datalake.`iceberg.bids`
+SETTINGS object_storage_cluster = 'swarm'
 ```
 
 #### Query Iceberg and local data together
@@ -268,11 +278,6 @@ ENGINE = Merge(REGEXP('local|datalake'), '.*bids')
 SELECT * FROM all_bids
 ;
 ```
-
-#### Query on Iceberg database using Antalya swarm cluster
-
-(Does not work in Antalya build 24.12.2.20101. Will be implemented in
-the next build.)
 
 ### Using Spark
 

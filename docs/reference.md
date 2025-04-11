@@ -9,14 +9,18 @@ table function.
 
 The Iceberg database engine connects ClickHouse to an Iceberg REST catalog. The
 tables listed in the REST catalog show up as database. The Iceberg REST catalog
-must already exist. Here is an example of the syntax. 
+must already exist. Here is an example of the syntax. Note that you must enable
+Iceberg database support with the allow_experimental_database_iceberg. This can
+also be placed in a user profile to enable it by default. 
 
 ```
+SET allow_experimental_database_iceberg=true;
+
 CREATE DATABASE datalake
 ENGINE = Iceberg('http://rest:8181/v1', 'minio', 'minio123')
 SETTINGS catalog_type = 'rest', 
 storage_endpoint = 'http://minio:9000/warehouse', 
-warehouse = 'iceberg'
+warehouse = 'iceberg';
 ```
 
 The Iceberg database engine takes three arguments:
@@ -49,6 +53,14 @@ SELECT count()
 FROM iceberg('http://minio:9000/warehouse/data')
 ```
 
+You can dispatch queries to the swarm as follows: 
+
+```
+SELECT count()
+FROM iceberg('http://minio:9000/warehouse/data') 
+SETTINGS object_storage_cluster = 'swarm'
+```
+
 The iceberg() function is an alias for icebergS3(). See the upstream docs for more information. 
 
 It's important to note that the iceberg() table function expects to see data
@@ -68,8 +80,20 @@ query on S3 files as well as Iceberg tables (which are just collections of S3 fi
 
 ### Using Swarm Clusters to speed up query
 
-To delegate subqueries to a swarm cluster, add the object_storage_cluster setting 
-as shown below with the swarm cluster name. 
+Swarm clusters can accelerate queries that use any of the following functions. 
+
+* s3() function
+* s3Cluster() function -- Specify as function argument
+* iceberg() function
+* icebergS3Cluster() function -- Specify as function argument
+* Iceberg table engine, including tables made available via using the Iceberg database engine
+
+To delegate subqueries to a swarm cluster, add the object_storage_cluster
+setting as shown below with the swarm cluster name. You can also set
+the value in a user profile, which will ensure that the setting applies by default
+to all queries for that user. 
+
+Here's an example of a query on Parquet files using Hive partitioning. 
 
 ```
 SELECT hostName() AS host, count()
@@ -78,13 +102,14 @@ GROUP BY host
 SETTINGS use_hive_partitioning=1, object_storage_cluster='swarm'
 ```
 
-Swarm clusters can be used in SELECT queries on the following:
+Here is an example of querying the same data via Iceberg using the swarm 
+cluster.
 
-* s3() function
-* s3Cluster() function -- Specify as function argument
-* iceberg() -- SUPPORTED IN NEXT ANTALYA BUILD
-* icebergS3Cluster() -- Specify as function argument
-* iceberg table engine -- SUPPORTED IN NEXT ANTALYA BUILD
+```
+SELECT count()
+FROM datalake.`iceberg.bids`
+SETTINGS object_storage_cluster = 'swarm'
+```
 
 Here's an example of using the swarm cluster with the icebergS3Cluster()
 function.
@@ -94,6 +119,18 @@ SELECT hostName() AS host, count()
 FROM icebergS3Cluster('swarm', 'http://minio:9000/warehouse/data')
 GROUP BY host
 ```
+
+### Relevant settings for swarm clusters
+
+The following list shows the main query settings that affect swarm
+cluster processing.
+
+| Setting Name | Description | Value |
+|--------------|-------------|-------|
+| enable_filesystem_cache | Use filesystem cache for S3 | 0 or 1 | 
+| input_format_parquet_use_metadata_cache | Cache Parquet file metadata | 0 or 1 | 
+| object_storage_cluster | Swarm cluster name | String |
+| use_hive_partitioning | Files follow Hive partitioning | 0 or 1 | 
 
 ### Configuring swarm cluster autodiscovery
 
@@ -266,3 +303,32 @@ GROUP BY host, cache_name
 ORDER BY host, cache_name ASC
 FORMAT Vertical
 ```
+
+Find out how many S3 calls an individual ClickHouse is making. When caching
+is working properly you should see the values remain the same between 
+successive queries. 
+
+```
+SELECT name, value
+FROM clusterAllReplicas('swarm', system.events)
+WHERE event ILIKE '%s3%'
+ORDER BY 1
+```
+
+To see S3 stats across all servers, use the following. 
+```
+SELECT hostName() host, name, sum(value) AS value
+FROM clusterAllReplicas('all', system.events)
+WHERE event ILIKE '%s3%'
+GROUP BY 1, 2 ORDER BY 1, 2
+```
+
+To see S3 stats for a single query spread across multiple hosts, issue the following request. 
+```
+SELECT hostName() host, k, v 
+FROM clusterAllReplicas('all', system.query_log)
+ARRAY JOIN ProfileEvents.keys AS k, ProfileEvents.values AS v
+WHERE initial_query_id = '5737ecca-c066-42f8-9cd1-a910a3d1e0b4' AND type = 2
+AND k ilike '%S3%'
+ORDER BY host, k
+```  
