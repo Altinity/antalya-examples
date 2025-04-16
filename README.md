@@ -4,7 +4,7 @@
 
 # Altinity Antalya Examples Project
 
-Altinity Antalya is a new branch of ClickHouse code designed to
+Altinity Antalya is a new branch of ClickHouse® code designed to
 integrate real-time analytic query with data lakes.  This project
 provides documentation as well as working code examples to help you use
 and contribute to Antalya.
@@ -15,24 +15,24 @@ The main goals of Antalya are as follows.
 
 * Enable real-time analytics to work off a single copy of
   data that is shared with AI and data science applications.
-* Provide a single SQL endpoint for native ClickHouse and data lake data.
+* Provide a single SQL endpoint for native ClickHouse® and data lake data.
 * Use open table formats to enable easy access from any application type.
 * Separate compute and storage; moreover, allow usres to scale compute 
   for ingest, merge, transformatino, and query independently. 
 
 Antalya will implement these goals through the following concrete features:
 
-1. Optimize query performance of ClickHouse on Parquet files stored 
+1. Optimize query performance of ClickHouse® on Parquet files stored 
    S3-compatible object storage. 
-2. Enable ClickHouse clusters to add pools of stateless servers aka swarm
+2. Enable ClickHouse® clusters to add pools of stateless servers aka swarm
    clusters that handle query and insert operations on shared object storage 
    files with linear scaling.
-3. Adapt ClickHouse to use Iceberg tables as shared storage.
-4. Enable ClickHouse clusters to extend existing tables onto unlimited
+3. Adapt ClickHouse® to use Iceberg tables as shared storage.
+4. Enable ClickHouse® clusters to extend existing tables onto unlimited
    Iceberg storage with transparent query across both native MergeTree and
    Parquet data. 
 5. Simplify backup and DR by leveraging Iceberg snapshots.
-6. Maintain full compability with upstream ClickHouse features and
+6. Maintain full compability with upstream ClickHouse® features and
    bug fixes.
 
 At this time Antalya builds demonstrate features 1, 2, 3 (partially), and 6. 
@@ -57,18 +57,18 @@ clusters on a large blockchain dataset stored in Parquet.
 
 ### Packages
 
-Antalya clickhouse server and keeper packages are available on the 
+Antalya ClickHouse® server and keeper packages are available on the 
 [builds.altinity.cloud](https://builds.altinity.cloud/) page. Scan to the last 
 section to find them. 
 
 ### Containers
 
-Antalya clickhouse server and clickhouse keeper containers are available
+Antalya ClickHouse® server and ClickHouse® keeper containers are available
 on Docker Hub. To start Antalya run the following Docker commands:
 
 ```
-docker run altinity/clickhouse-server:24.12.2.20101.altinityantalya
-docker run altinity/clickhouse-keeper:24.12.2.20101.altinityantalya
+docker run altinity/ClickHouse®-server:24.12.2.20101.altinityantalya
+docker run altinity/ClickHouse®-keeper:24.12.2.20101.altinityantalya
 ```
 
 ## Documentation
@@ -84,8 +84,8 @@ Look in the docs directory for current documentation.
 To access Antalya code run the following commands. 
 
 ```
-git clone git@github.com:Altinity/ClickHouse.git Antalya-Clickhouse
-cd Antalya-ClickHouse
+git clone git@github.com:Altinity/ClickHouse®.git Antalya-ClickHouse®
+cd Antalya-ClickHouse®
 git checkout project-antalya-24.12.2
 ```
 
@@ -94,7 +94,7 @@ memory-friendly shortly.
 
 ## Building
 
-Follow ClickHouse build instructions. 
+Follow ClickHouse® build instructions. 
 
 ## Contributing
 
@@ -110,11 +110,11 @@ Join the [AltinityDB Slack Workspace](https://altinity.com/slack) or
 
 Altinity is the primary maintainer of Antalya. It is the basis of our data 
 lake-enabled Altinity.Cloud and is also used in self-managed installations. 
-Altinity offers a range of services related to ClickHouse and data lakes. 
+Altinity offers a range of services related to ClickHouse® and data lakes. 
 
 - [Official website](https://altinity.com/) - Get a high level overview of Altinity and our offerings.
-- [Altinity.Cloud](https://altinity.com/cloud-database/) - Run ClickHouse in our cloud or yours.
-- [Altinity Support](https://altinity.com/support/) - Get Enterprise-class support for ClickHouse.
-- [Slack](https://altinity.com/slack) - Talk directly with ClickHouse users and Altinity devs.
+- [Altinity.Cloud](https://altinity.com/cloud-database/) - Run ClickHouse® in our cloud or yours.
+- [Altinity Support](https://altinity.com/support/) - Get Enterprise-class support for ClickHouse®.
+- [Slack](https://altinity.com/slack) - Talk directly with ClickHouse® users and Altinity devs.
 - [Contact us](https://hubs.la/Q020sH3Z0) - Contact Altinity with your questions or issues.
-- [Free consultation](https://hubs.la/Q020sHkv0) - Get a free consultation with a ClickHouse expert today.
+- [Free consultation](https://hubs.la/Q020sHkv0) - Get a free consultation with a ClickHouse® expert today.
