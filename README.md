@@ -1,3 +1,5 @@
+<div align=center>
+
 <a href="https://altinity.com/slack">
   <img src="https://img.shields.io/static/v1?logo=slack&logoColor=959DA5&label=Slack&labelColor=333a41&message=join%20conversation&color=3AC358" alt="AltinityDB Slack" />
 </a>
@@ -7,6 +9,8 @@
     <source media="(prefers-color-scheme: light)" srcset="/docs/images/logo_horizontal_blue_black.png">
     <img alt="Altinity company logo" src="/docs/images/logo_horizontal_blue_black.png">
 </picture>
+
+</div>
 
 # Altinity Project Antalya Examples
 
@@ -77,7 +81,6 @@ section to find them.
 
 ### Containers
 
-<<<<<<< HEAD
 Project Antalya ClickHouse® server and ClickHouse® keeper containers are available
 on Docker Hub. To start Antalya run the following Docker commands:
 
