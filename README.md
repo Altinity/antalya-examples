@@ -77,6 +77,7 @@ section to find them.
 
 ### Containers
 
+<<<<<<< HEAD
 Project Antalya ClickHouse® server and ClickHouse® keeper containers are available
 on Docker Hub. To start Antalya run the following Docker commands:
 
@@ -140,4 +141,3 @@ Altinity offers a range of services related to ClickHouse® and data lakes.
 - [Slack](https://altinity.com/slack) - Talk directly with ClickHouse® users and Altinity devs.
 - [Contact us](https://hubs.la/Q020sH3Z0) - Contact Altinity with your questions or issues.
 - [Free consultation](https://hubs.la/Q020sHkv0) - Get a free consultation with a ClickHouse® expert today.
-
