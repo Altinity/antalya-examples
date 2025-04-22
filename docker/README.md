@@ -71,7 +71,6 @@ Select Iceberg table data.
 SELECT hostName() AS host, count()
 FROM icebergS3Cluster('swarm', 'http://minio:9000/warehouse/data')
 GROUP BY host
-SETTINGS object_storage_cluster = 'swarm'
 ```
 
 You will be able to see swarm host names in the results for both queries.
@@ -215,7 +214,6 @@ syntax.
 SELECT hostName() AS host, count()
 FROM icebergS3Cluster('swarm', 'http://minio:9000/warehouse/data')
 GROUP BY host
-SETTINGS object_storage_cluster = 'swarm'
 ```
 
 #### Query using the Iceberg REST catalog
