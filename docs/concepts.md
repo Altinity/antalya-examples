@@ -2,10 +2,10 @@
 
 ## Overview
 
-Antalya is an extended version of ClickHouse that offers all existing
-capabilities plus additional features that allow Antalya clusters to
-use Iceberg as shared storage. The following diagram shows the main 
-parts of an Antalya installation. 
+Project Antalya is an extended version of ClickHouse that offers all
+existing capabilities plus additional features that allow Antalya clusters
+to use Iceberg as shared storage. The following diagram shows the main
+parts of an Antalya installation.
 
 ![Antalya Reference Architecture](images/Antalya-Reference-Architecture-2025-02-17.png)
 
@@ -35,9 +35,11 @@ Antalya supports reading Iceberg V2. It cannot write to Iceberg
 tables. For that you must currently use other tools, such as Spark
 or pyiceberg.
 
-There are a number of bugs and missing features in Iceberg support. If
-you find something unexpected, please log an issue on the antalya-examples
-project for now. 
+There are a number of bugs and missing features in Iceberg support. If you
+find something unexpected, please 
+[log an issue](https://github.com/Altinity/ClickHouse/issues/new/choose)
+on the Altinity ClickHouse repo. Use one of the Project Antalya issue
+templates so that the report is automatically tagged to Project Antalya.
 
 ### Iceberg Database Engine
 
@@ -48,7 +50,7 @@ the most natural way to interate with Iceberg tables.
 
 ### Iceberg Table Engine and Table Function
 
-Antalya offers Iceberg table engine and function just like upstream 
+Antalya offers Iceberg table engine and functions just like upstream 
 ClickHouse. They encapsulate a single table using the object storage
 path to locate the table metadata and data. Currently only one table
 can use the path. 
@@ -61,7 +63,7 @@ format.  The capabilities are largely identical to upstream ClickHouse.
 ## Swarm Clusters
 
 Antalya introduces the notion of swarm clusters, which are clusters of
-stateless ClickHouse servers that can be used for parallel query to as
+stateless ClickHouse servers that can be used for parallel query as
 well as (in future) writes to Iceberg. Swarm clusters can scale up and
 down quickly.
 

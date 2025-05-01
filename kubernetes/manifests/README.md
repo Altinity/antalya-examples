@@ -21,10 +21,10 @@ Install [Altinity Kubernetes Operator for ClickHouse](https://github.com/Altinit
 
 Use Kubectl to install manifests in your default namespace. 
 ```
-kubectl apply -f keeper.yaml
-kubectl apply -f vector.yaml
 kubectl apply -f gp3-encrypted-fast-storage-class.yaml
+kubectl apply -f keeper.yaml
 kubectl apply -f swarm.yaml
+kubectl apply -f vector.yaml
 ```
 
 The swarm servers use EBS volumes which integrate well with cluster autoscaling

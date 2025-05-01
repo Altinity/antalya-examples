@@ -130,6 +130,7 @@ cluster processing.
 | enable_filesystem_cache | Use filesystem cache for S3 | 0 or 1 | 
 | input_format_parquet_use_metadata_cache | Cache Parquet file metadata | 0 or 1 | 
 | object_storage_cluster | Swarm cluster name | String |
+| object_storage_max_nodes | Number of swarm nodes to use (defaults to all nodes) | Integer |
 | use_hive_partitioning | Files follow Hive partitioning | 0 or 1 | 
 
 ### Configuring swarm cluster autodiscovery

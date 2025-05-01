@@ -1,15 +1,14 @@
 # Antalya Kubernetes Example
 
 This directory contains samples for querying a Parquet-based data lake
-lake using AWS EKS, AWS S3, and Altinity Antalya. 
-
-Note: Iceberg will be covered in the next Antalya build. 
+lake using AWS EKS, AWS S3, and Project Antalya. 
 
 ## Quickstart
 
 ### Prerequisites
 
 Install: 
+* [aws-cli](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 * [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
 * [terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 
@@ -46,7 +45,8 @@ Coming soon. This will work for any Kubernetes distribution.
 
 ### Querying Parquet files on AWS S3
 
-AWS kindly provides [AWS Public Block Data](https://registry.opendata.aws/aws-public-blockchain/), 
+AWS kindly provides 
+[AWS Public Block Data](https://registry.opendata.aws/aws-public-blockchain/), 
 which we will use as example data for Parquet on S3. 
 
 Start by logging into the vector server. 
@@ -85,11 +85,13 @@ SETTINGS use_hive_partitioning = 1, object_storage_cluster = 'swarm',
 input_format_parquet_use_metadata_cache = 1, enable_filesystem_cache = 1;
 ```
 
-Successive queries will complete somewhat faster due to caching.
+Successive queries will complete faster as caches load. 
 
-Next, increase the size of the swarm server by directly editing the
-swarm CHI resource, changing the number of shards to 8, and submitting
-the changes. (Example using manifest files.)
+### Improving performance by scaling up the swarm
+
+You can at any time increase the size of the swarm server by directly
+editing the swarm CHI resource, changing the number of shards to 8,
+and submitting the changes. (Example using manifest files.)
 
 ```
 kubectl edit chi swarm
@@ -105,3 +107,74 @@ Run the query again after scale-up completes. You should see the response
 time drop by roughly 50%. Try running it again. You should see a further drop 
 as swarm caches pick up additional files. You can scale up further to see 
 additional drops. This setup has been tested to 16 nodes. 
+
+To scale down the swarm, just edit the shardsCount again and set it to 
+a smaller number. 
+
+Important note: You may see failed queries as the swarm scales down. This
+is [a known issue](https://github.com/Altinity/ClickHouse/issues/759)
+and will be corrected soon.
+
+### Querying Parquet files in Iceberg
+
+You can load the public data set into Iceberg, which makes the queries
+much easier to construct. Here are examples of the same queries when 
+the public data are available in Iceberg with a REST server. 
+
+(We'll be releasing open source tools shortly to load the public dataset
+into Iceberg in your own environment. We also plan to release an Iceberg
+dataset with a public REST endpoint. For now this step is an exercise
+for the reader.)
+
+First, create a database connected to your REST server
+
+```
+SET allow_experimental_database_iceberg=true;
+
+CREATE DATABASE ice
+  ENGINE = Iceberg('https://rest-catalog.dev.altinity.cloud')
+  SETTINGS catalog_type = 'rest',
+    auth_header = 'Authorization: Bearer jj...2j',
+    warehouse = 's3://aws...iceberg';
+```
+
+Show the tables available in the database. 
+
+```
+SHOW TABLES FROM ice
+
+   ┌─name──────────────────────┐
+1. │ aws-public-blockchain.btc │
+   └───────────────────────────┘
+```
+
+Try counting rows. This goes faster if you enable caching of Iceberg metadata. 
+
+```
+SELECT count()
+FROM ice.`aws-public-blockchain.btc`
+SETTINGS use_hive_partitioning = 1, object_storage_cluster = 'swarm',
+input_format_parquet_use_metadata_cache = 1, enable_filesystem_cache = 1,
+use_iceberg_metadata_files_cache=1;
+```
+
+Now try the same query that we ran earlier directly against the public S3 
+dataset files. Caches are not enabled. 
+
+```
+SELECT date, sum(output_count)
+FROM ice.`aws-public-blockchain.btc`
+WHERE date >= '2025-01-01' GROUP BY date ORDER BY date ASC
+SETTINGS use_hive_partitioning = 1, object_storage_cluster = 'swarm';
+```
+
+Try the same query with all caches enabled. It should be faster. 
+
+```
+SELECT date, sum(output_count)
+FROM ice.`aws-public-blockchain.btc`
+WHERE date >= '2025-01-01' GROUP BY date ORDER BY date ASC
+SETTINGS use_hive_partitioning = 1, object_storage_cluster = 'swarm',
+input_format_parquet_use_metadata_cache = 1, enable_filesystem_cache = 1,
+use_iceberg_metadata_files_cache = 1;
+```
