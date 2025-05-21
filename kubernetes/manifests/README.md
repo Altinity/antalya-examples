@@ -33,7 +33,8 @@ but are suboptimal for caches.
 ## NVMe SSD swarm support (experimental)
 
 The [nvme](./nvme) directory contains work in progress. See the
-[README.md](nvme/README.md) for more information.
+[README.md](nvme/README.md) for more information. Otherwise skip this
+section. 
 
 ## Verify installation
 
@@ -51,7 +52,7 @@ You should see the swarm cluster in the last line with 4 hosts listed. Confirm t
 all hosts are responsive with the following query. 
 
 ```
-SELECT hostName()
+SELECT hostName(), version()
 FROM clusterAllReplicas('swarm', system.one)
 ORDER BY 1 ASC
 ```

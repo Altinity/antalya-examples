@@ -31,7 +31,7 @@ The Iceberg database engine takes three arguments:
 
 The following settings are supported. 
 
-* auth_head - Authorization header of format 'Authorization: <scheme> <auth_info>'
+* auth_header - Authorization header of format 'Authorization: <scheme> <auth_info>'
 * auth_scope - Authorization scope for client credentials or token exchange
 * oauth_server_uri - OAuth server URI
 * vended_credentials - Use vended credentials (storage credentials) from catalog
@@ -127,11 +127,14 @@ cluster processing.
 
 | Setting Name | Description | Value |
 |--------------|-------------|-------|
-| enable_filesystem_cache | Use filesystem cache for S3 | 0 or 1 | 
-| input_format_parquet_use_metadata_cache | Cache Parquet file metadata | 0 or 1 | 
-| object_storage_cluster | Swarm cluster name | String |
-| object_storage_max_nodes | Number of swarm nodes to use (defaults to all nodes) | Integer |
-| use_hive_partitioning | Files follow Hive partitioning | 0 or 1 | 
+| `enable_filesystem_cache` | Use filesystem cache for S3 blocks | 0 or 1 | 
+| `input_format_parquet_use_metadata_cache` | Cache Parquet file metadata | 0 or 1 | 
+| `input_format_parquet_metadata_cache_max_size` | Parquet metadata cache size (defaults to 500MiB) | Integer |
+| `object_storage_cluster` | Swarm cluster name | String |
+| `object_storage_max_nodes` | Number of swarm nodes to use (defaults to all nodes) | Integer |
+| `use_hive_partitioning` | Files follow Hive partitioning | 0 or 1 | 
+| `use_iceberg_metadata_files_cache` | Cache parsed Iceberg metadata files in memory | 0 or 1 | 
+| `use_iceberg_partition_pruning` | Prune files based on Iceberg data | 0 or 1 | 
 
 ### Configuring swarm cluster autodiscovery
 
@@ -226,6 +229,41 @@ which remain the same.
 Caches make a major difference in the performance of ClickHouse queries. This 
 section describes how to configure them in a swarm cluster. 
 
+### Iceberg Metadata Cache
+
+The Iceberg metadata cache keeps parsed table definitions in memory. It is
+enabled using the `use_iceberg_metadata_files_cache setting`, as shown in the 
+following example: 
+
+```
+SELECT count()
+FROM ice.`aws-public-blockchain.btc`
+SETTINGS object_storage_cluster = 'swarm', 
+use_iceberg_metadata_files_cache = 0;
+```
+
+Reading and parsing Iceberg metadata files (including metadata.json,
+manifest list, and manifest files) is slow. Enabling this setting can
+speed up query planning significantly.
+
+### Parquet Metadata Cache
+
+The Parquet metadata cache keeps metadata from individual Parquets in memory, 
+including column metadata, min/max statistics, and Bloom filter indexes. 
+Swarm nodes use the metadata to avoid fetching unnecessary blocks from 
+object storage. If no blocks are needed the swarm node skips the file entirely. 
+
+The following example shows how to enable Parquet metadata caching. 
+```
+SELECT count()
+FROM ice.`aws-public-blockchain.btc`
+SETTINGS object_storage_cluster = 'swarm', 
+input_format_parquet_use_metadata_cache = 1;
+```
+
+The server setting `input_format_parquet_metadata_cache_max_size` controls the 
+size of the cache. It currently defaults to 500MiB. 
+
 ### S3 Filesystem Cache
 
 This cache stores blocks read from object storage on local disk. It offers 
@@ -254,7 +292,7 @@ spec:
 
 #### Enable cache use in queries
 
-The following settings control use of the cache. 
+The following settings control use of the filesystem cache. 
 
 * enable_filesystem_cache - Enable filesystem cache (1=enabled)
 * enable_filesystem_cache_log - Enable logging of cache operations (1=enabled)
@@ -333,3 +371,26 @@ WHERE initial_query_id = '5737ecca-c066-42f8-9cd1-a910a3d1e0b4' AND type = 2
 AND k ilike '%S3%'
 ORDER BY host, k
 ```  
+
+### S3 List Objects Cache
+
+Listing files in object storage using the S3 ListObjectsV2 call is 
+expensive.  The S3 List Objects Cache avoids repeated calls and can 
+cut down significant time during query planning. You can enable it 
+using the `use_object_storage_list_objects_cache` setting as shown below. 
+
+```
+SELECT date, count()
+FROM s3('s3://aws-public-blockchain/v1.0/btc/transactions/*/*.parquet', NOSIGN)
+WHERE (date >= '2025-01-01') AND (date <= '2025-01-31')
+GROUP BY date
+ORDER BY date ASC
+SETTINGS use_hive_partitioning = 1, use_object_storage_list_objects_cache = 1
+``` 
+
+The setting can speed up performance enormously but has a number of limitations:
+
+* It does not speed up Iceberg queries, since Iceberg metadata provides lists 
+  of files. 
+* It is best for datasets that are largely read-only. It may cause queries to miss 
+  newer files, if they arrive while the cache is active. 
