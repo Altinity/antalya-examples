@@ -14,8 +14,12 @@ pods can be scheduled.
 
 ## Prerequisites
 
-Install [Altinity Kubernetes Operator for ClickHouse](https://github.com/Altinity/clickhouse-operator). 
-(Must be 0.24.4 or above to support CHK resource to manage ClickHouse Keeper.)
+Install the latest production version of the [Altinity Kubernetes Operator
+for ClickHouse](https://github.com/Altinity/clickhouse-operator).
+
+```
+kubectl apply -f https://raw.githubusercontent.com/Altinity/clickhouse-operator/master/deploy/operator/clickhouse-operator-install-bundle.yaml
+```
 
 ## Installation
 

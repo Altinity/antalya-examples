@@ -11,7 +11,7 @@ keeper:
     size: "25Gi"
   image:
     repository: "altinity/clickhouse-keeper"
-    tag: "25.2.2.28788.altinityantalya"
+    tag: "25.3.3.20139.altinityantalya"
     pullPolicy: "IfNotPresent"
 
 # ClickHouse Vector settings
@@ -32,7 +32,7 @@ vector:
         effect: "NoSchedule"
   image:
     repository: "altinity/clickhouse-server"
-    tag: "25.2.2.28788.altinityantalya"
+    tag: "25.3.3.20139.altinityantalya"
 
 # ClickHouse Swarm settings
 swarm:
@@ -66,4 +66,4 @@ swarm:
             topologyKey: "kubernetes.io/hostname"
   image:
     repository: "altinity/clickhouse-server"
-    tag: "25.2.2.28788.altinityantalya"
+    tag: "25.3.3.20139.altinityantalya"
