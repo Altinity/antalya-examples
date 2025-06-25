@@ -20,6 +20,7 @@ Install [Docker Desktop](https://docs.docker.com/engine/install/) and
 ```
 ./x-up.sh
 ```
+On MacOS you may need to use `docker compose up`. 
 
 ### Enable Python and create data
 
