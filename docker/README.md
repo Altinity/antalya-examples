@@ -54,7 +54,7 @@ Confirm you are connected to Antalya.
 SELECT version()
 
    ┌─version()────────────────────┐
-1. │ 25.2.2.27660.altinityantalya │
+1. │ 25.3.3.20143.altinityantalya │
    └──────────────────────────────┘
 ```
 
@@ -147,15 +147,6 @@ Both of them read all files from all Iceberg snapshots. If you remove
 or change data they won't give the right answer. 
 
 #### Direct query on Parquet files using Antalya swarm cluster. 
-
-First, make sure you are talking to an Antalya build. 
-```
-SELECT version()
-
-   ┌─version()────────────────────┐
-1. │ 25.2.2.27660.altinityantalya │
-   └──────────────────────────────┘
-```
 
 You can dispatch queries to the Antalya swarm cluster using s3() 
 function with the object_storage_cluster setting. Or you can use 
