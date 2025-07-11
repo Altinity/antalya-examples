@@ -108,8 +108,8 @@ kubectl -n antalya exec -it ice-rest-catalog-0 -- ice insert btc.transactions \
 
 ## Connecting ClickHouse to the ice catalog. 
 
-Issue SQL commands to connect to the Ice catalog. You should see the 
-tables you just added. 
+Issue SQL commands to connect to the Ice catalog. Adjust the string in the warehouse setting to 
+match the name of your S3 bucket. 
 
 ```
 kubectl -n antalya exec -it chi-vector-example-0-0-0 -- clickhouse-client 
@@ -123,10 +123,12 @@ CREATE DATABASE ice
   ENGINE = DataLakeCatalog('http://ice-rest-catalog:5000')
   SETTINGS catalog_type = 'rest',
     auth_header = 'Authorization: Bearer foo',
-    warehouse = 's3://${CATALOG_BUCKET}';
+    warehouse = 's3://<your-user-name>-ice-rest-catalog-demo';
 
 SHOW TABLES FROM ice;
 ```
+
+The last command should show the tables you just added. 
 
 # Troubleshooting
 
