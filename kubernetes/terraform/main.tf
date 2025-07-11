@@ -68,30 +68,6 @@ module "eks_clickhouse" {
       }]
     },
     {
-      name          = "clickhouse-nvme-swarm"
-      instance_type = "i8g.xlarge"
-      ami_type      = "AL2_ARM_64"
-      desired_size  = 0
-      max_size      = 20
-      min_size      = 0
-      zones         = ["${local.region}a"]
-      # zones         = ["${local.region}a", "${local.region}b", "${local.region}c"]
-      taints        = [{
-         key    = "antalya"
-         value  = "nvme-swarm"
-         effect = "NO_SCHEDULE"
-      }]
-      labels        = {
-         "aws.amazon.com/eks-local-ssd" = "true"
-      }
-      # This should add a tag on the EKS node group but does not. 
-      # Add the tag manually. See
-      # https://github.com/Altinity/terraform-aws-eks-clickhouse/issues/27
-      tags = {
-        "k8s.io/cluster-autoscaler/node-template/label/aws.amazon.com/eks-local-ssd" = "true"
-      }
-    },
-    {
       name          = "system"
       instance_type = "t3.large"
       desired_size  = 1

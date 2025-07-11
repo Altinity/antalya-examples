@@ -18,14 +18,14 @@ appropriately.
 
 ## Installation
 
-1. Copy the module file from the terraform project to file main.tf.
-2. Update the region and any other parameters you wish to change. 
+1. Edit the main.tf file. 
+2. Update the cluster name, region, and any other parameters you wish to change. 
 3. Follow the installation instructions. Typical commands are shown below. 
 
 ```
 terraform init
 terraform apply
-aws eks update-kubeconfig --name my-eks-cluster
+aws eks update-kubeconfig --name my-eks-cluster 
 ```
 
 ## Trouble-shooting

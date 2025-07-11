@@ -31,7 +31,7 @@ questions or log ideas and issues.
 
 Analytic data size has increased to a point where traditional designs
 based on shared-nothing architectures and block storage are prohibitively
-expensive to operate. Project Antalya introduces a new, fully open source
+expensive to operate. Project Antalya introduces a fully open source
 architecture for cost-efficient, real-time systems using cheap object
 storage and scalable compute, specifically:
 
