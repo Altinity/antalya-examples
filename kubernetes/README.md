@@ -28,7 +28,7 @@ Create a namespace named antalya and make it the default. (You don't
 have to do this but the examples assume it.)
 
 ```
-create ns antalya
+kubectl create ns antalya
 kubectl config set-context --current --namespace=antalya
 ```
 
