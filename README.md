@@ -59,7 +59,7 @@ Antalya will implement these goals through the following concrete features:
 
 ## Roadmap
 
-(Project Antalya Roadmap 2025 - Real-Time Data Lakes)[https://github.com/Altinity/ClickHouse/issues/804]
+[Project Antalya Roadmap 2025 - Real-Time Data Lakes](https://github.com/Altinity/ClickHouse/issues/804)
 
 ## Licensing
 
