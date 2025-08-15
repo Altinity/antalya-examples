@@ -22,7 +22,10 @@ catalog = load_catalog(
     }  
 )
 
-print("Get table data as a Pandas dataframe and print it")
-table = catalog.load_table("iceberg.bids")
-df = table.scan().to_pandas()
-print(df)
+print("Get iceberg.bids data as a Pandas dataframe and print it")
+try:
+    table = catalog.load_table("iceberg.bids")
+    df = table.scan().to_pandas()
+    print(df)
+except pyiceberg.exceptions.NoSuchTableError:
+    print("Table iceberg.bids does not exist")
