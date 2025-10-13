@@ -1,0 +1,6 @@
+# Ports are remapped from 5000 (ice catalog default) 
+# and 9000 (minio API default) to avoid collisions. 
+uri: http://localhost:5001
+bearerToken: foo
+s3:
+  endpoint: http://localhost:9002

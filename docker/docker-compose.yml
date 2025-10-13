@@ -1,81 +1,68 @@
 services:
-  spark-iceberg:
-    image: tabulario/spark-iceberg
-    container_name: spark-iceberg
-    depends_on:
-      - rest
-      - minio
-    environment:
-      - AWS_ACCESS_KEY_ID=minio
-      - AWS_SECRET_ACCESS_KEY=minio123
-      - AWS_REGION=us-east-1
-    ports:
-      - 8080:8080
-      - 10000:10000
-      - 10001:10001
-  rest:
-    image: tabulario/iceberg-rest
-    container_name: iceberg-rest
-    ports:
-      - 8182:8181
-    environment:
-      - AWS_ACCESS_KEY_ID=minio
-      - AWS_SECRET_ACCESS_KEY=minio123
-      - AWS_REGION=us-east-1
-      - CATALOG_WAREHOUSE=s3://iceberg_data/
-      - CATALOG_IO__IMPL=org.apache.iceberg.aws.s3.S3FileIO
-      - CATALOG_S3_ENDPOINT=http://minio:9000
   vector:
-    image: altinity/clickhouse-server:25.3.3.20186.altinityantalya
+    depends_on:
+      - minio-init
+      - keeper
+    image: altinity/clickhouse-server:25.6.5.20363.altinityantalya
     container_name: vector
     hostname: vector
     ports:
+      - 8123:8123
       - 9000:9000
+    configs:
+      - source: clickhouse-init
+        target: /docker-entrypoint-initdb.d/init-db.sh
     volumes:
       - ./config.d/vector:/etc/clickhouse-server/config.d
       - ./users.d:/etc/clickhouse-server/users.d
-      - ./logs/vector:/var/log/clickhouse-server
+      - ./data/vector/log:/var/log/clickhouse-server
+      - ./data/vector/clickhouse:/var/lib/clickhouse
     environment:
       - AWS_ACCESS_KEY_ID=minio
       - AWS_SECRET_ACCESS_KEY=minio123
-      - AWS_REGION=us-east-1
+      - AWS_REGION=minio
   keeper:
-    image: altinity/clickhouse-keeper:25.3.3.20186.altinityantalya
+    image: altinity/clickhouse-keeper:25.6.5.20363.altinityantalya
     container_name: keeper
     hostname: keeper
     ports:
-      - 2181:2181
+      - 9181:9181
     volumes:
       # Note special location of Keeper config overrides.
       - ./config.d/keeper:/etc/clickhouse-keeper/keeper_config.d
-      - ./logs/keeper:/var/log/clickhouse-keeper
+      - ./data/keeper/log:/var/log/clickhouse-keeper
+      - ./data/keeper/keeper:/var/lib/keeper
   swarm-1:
-    image: altinity/clickhouse-server:25.3.3.20186.altinityantalya
+    image: altinity/clickhouse-server:25.6.5.20363.altinityantalya
     container_name: swarm-1
     hostname: swarm-1
     volumes:
       - ./config.d/swarm:/etc/clickhouse-server/config.d
       - ./users.d:/etc/clickhouse-server/users.d
-      - ./logs/swarm-1:/var/log/clickhouse-server
+      - ./data/swarm-1/log:/var/log/clickhouse-server
+      - ./data/swarm-1/clickhouse:/var/lib/clickhouse
     environment:
       - AWS_ACCESS_KEY_ID=minio
       - AWS_SECRET_ACCESS_KEY=minio123
-      - AWS_REGION=us-east-1
+      - AWS_REGION=minio
   swarm-2:
-    image: altinity/clickhouse-server:25.3.3.20186.altinityantalya
+    image: altinity/clickhouse-server:25.6.5.20363.altinityantalya
     container_name: swarm-2
     hostname: swarm-2
     volumes:
       - ./config.d/swarm:/etc/clickhouse-server/config.d
       - ./users.d:/etc/clickhouse-server/users.d
-      - ./logs/swarm-2:/var/log/clickhouse-server
+      - ./data/swarm-2/log:/var/log/clickhouse-server
+      - ./data/swarm-2/clickhouse:/var/lib/clickhouse
     environment:
       - AWS_ACCESS_KEY_ID=minio
       - AWS_SECRET_ACCESS_KEY=minio123
-      - AWS_REGION=us-east-1
+      - AWS_REGION=minio
   minio:
-    image: minio/minio
+    image: minio/minio:RELEASE.2025-03-12T18-04-18Z
     container_name: minio
+    volumes:
+      - ./data/minio/data:/data
     environment:
       - MINIO_ROOT_USER=minio
       - MINIO_ROOT_PASSWORD=minio123
@@ -88,20 +75,95 @@ services:
         - 9001:9001
         - 9002:9000
     command: ["server", "/data", "--console-address", ":9001"]
-  mc:
+  minio-init:
     depends_on:
       - minio
-    image: minio/mc
+    image: minio/mc:RELEASE.2025-03-12T17-29-24Z
     container_name: mc
     environment:
       - AWS_ACCESS_KEY_ID=minio
       - AWS_SECRET_ACCESS_KEY=minio123
-      - AWS_REGION=us-east-1
+      - AWS_REGION=minio
     entrypoint: >
       /bin/sh -c "
       until (/usr/bin/mc alias set minio http://minio:9000 minio minio123) do echo '...waiting...' && sleep 1; done;
-      /usr/bin/mc rm -r --force minio/warehouse;
       /usr/bin/mc mb minio/warehouse --ignore-existing;
       /usr/bin/mc policy set public minio/warehouse;
       tail -f /dev/null
+      "
+  ice-rest-catalog:
+    image: altinity/ice-rest-catalog:${ICE_REST_CATALOG_TAG:-latest}
+    pull_policy: ${ICE_REST_CATALOG_PULL_POLICY:-always}
+    restart: unless-stopped
+    ports:
+      - '5001:5000' # iceberg/http
+    configs:
+      - source: ice-rest-catalog-yaml
+        target: /etc/ice/ice-rest-catalog.yaml
+    volumes:
+      # for access to /var/lib/ice-rest-catalog/db.sqlite
+      - ./data/ice-rest-catalog/var/lib/ice-rest-catalog:/var/lib/ice-rest-catalog
+    depends_on:
+      - minio-init
+  spark-iceberg:
+    # https://github.com/databricks/docker-spark-iceberg
+    image: tabulario/spark-iceberg:3.5.5_1.8.1
+    container_name: spark-iceberg
+    # volumes:
+    #   - ./notebooks:/home/iceberg/notebooks/local
+    configs:
+      - source: spark-defaults.conf
+        target: /opt/spark/conf/spark-defaults.conf
+    ports:
+      - 8888:8888 # jupyter-notebook
+      - 8080:8080 # spark-master
+configs:
+  ice-rest-catalog-yaml:
+    content: |
+      uri: jdbc:sqlite:file:/var/lib/ice-rest-catalog/db.sqlite?journal_mode=WAL&synchronous=OFF&journal_size_limit=500
+      #warehouse: s3://iceberg_data
+      warehouse: s3://warehouse
+      s3:
+        endpoint: http://minio:9000
+        pathStyleAccess: true
+        accessKeyID: minio
+        secretAccessKey: minio123
+        region: minio
+      bearerTokens:
+        - value: foo
+  spark-defaults.conf:
+    content: |
+      spark.sql.extensions                      org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
+      spark.sql.catalog.default                 org.apache.iceberg.spark.SparkCatalog
+      spark.sql.catalog.default.type            rest
+      spark.sql.catalog.default.uri             http://ice-rest-catalog:5000
+      spark.sql.catalog.default.header.authorization bearer foo
+      spark.sql.catalog.default.io-impl         org.apache.iceberg.aws.s3.S3FileIO
+      spark.sql.catalog.default.warehouse       s3://warehouse
+      spark.sql.catalog.default.s3.endpoint     http://minio:9000
+      spark.sql.catalog.default.s3.path-style-access true
+      spark.sql.catalog.default.s3.access-key   minio
+      spark.sql.catalog.default.s3.secret-key   minio123
+      spark.sql.catalog.default.client.region   minio
+      spark.sql.catalog.default.s3.ssl-enabled  false
+      spark.sql.defaultCatalog                  default
+      spark.eventLog.enabled                    true
+      spark.eventLog.dir                        /home/iceberg/spark-events
+      spark.history.fs.logDirectory             /home/iceberg/spark-events
+      spark.sql.catalogImplementation           in-memory
+      # spark.log.level                         DEBUG
+  clickhouse-init:
+    content: |
+      #!/bin/bash
+      exec clickhouse client --query $"
+        SET allow_experimental_database_iceberg = 1;
+
+        DROP DATABASE IF EXISTS ice;
+
+        CREATE DATABASE ice
+          ENGINE = DataLakeCatalog('http://ice-rest-catalog:5000')
+          SETTINGS catalog_type = 'rest',
+            auth_header = 'Authorization: Bearer foo',
+            storage_endpoint = 'http://minio:9000',
+            warehouse = 's3://warehouse';
       "
