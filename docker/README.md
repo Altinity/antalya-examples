@@ -3,8 +3,8 @@
 This directory contains samples for construction of an Iceberg-based data 
 lake using Docker Compose and Altinity Antalya. 
 
-The docker compose structure and the Python scripts take inspiration from 
-[ClickHouse integration tests for Iceberg](https://github.com/ClickHouse/ClickHouse/tree/master/tests/integration/test_database_iceberg) but deviate substantially. 
+The docker compose structure and the Python scripts took early inspiration from 
+[ClickHouse integration tests for Iceberg](https://github.com/ClickHouse/ClickHouse/tree/master/tests/integration/test_database_iceberg) but have deviated substantially since then. 
 
 ## Quickstart
 
@@ -66,7 +66,7 @@ FROM ice.`nyc.taxis` GROUP BY date ORDER BY date
 SETTINGS object_storage_cluster='swarm'
 ```
 
-### Bring down cluster and delete data. 
+### Bring down cluster and delete data
 
 ```
 docker compose down
@@ -116,7 +116,7 @@ FROM ice.`iceberg.bids` GROUP BY symbol
 SETTINGS object_storage_cluster = 'swarm'
 ```
 
-## Using Spark wit ClickHouse and Ice
+## Using Spark with ClickHouse and Ice
 
 Connect to the spark-iceberg container command line. 
 ```
