@@ -45,8 +45,19 @@ Connect to the Antalya server container and start clickhouse-client.
 ```
 docker exec -it vector clickhouse-client
 ```
-(If this command fails with 'container is not running' error, run 
-`docker compose restart vector` and try again.) 
+
+Set up database pointing to Ice[berg] REST catalog. 
+```
+SET allow_experimental_database_iceberg = 1;
+
+DROP DATABASE IF EXISTS ice;
+
+CREATE DATABASE ice ENGINE = DataLakeCatalog('http://ice-rest-catalog:5000')
+SETTINGS catalog_type = 'rest',
+  auth_header = 'Authorization: Bearer foo',
+  storage_endpoint = 'http://minio:9000',
+  warehouse = 's3://warehouse';
+```
 
 Query data on vector only, followed by vector plus swarm servers.
 ```

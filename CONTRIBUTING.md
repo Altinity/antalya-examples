@@ -22,5 +22,6 @@ conventions.
 
 ## Use of AI tools
 
-Feel free to use AI tools but add this file to the context by telling your AI agent to follow these rules for design and code gen activities. 
+Feel free to use AI tools but add this file to the context by telling
+your AI agent to follow these rules for design and code gen activities.
 

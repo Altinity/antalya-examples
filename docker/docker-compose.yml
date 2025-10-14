@@ -9,9 +9,6 @@ services:
     ports:
       - 8123:8123
       - 9000:9000
-    configs:
-      - source: clickhouse-init
-        target: /docker-entrypoint-initdb.d/init-db.sh
     volumes:
       - ./config.d/vector:/etc/clickhouse-server/config.d
       - ./users.d:/etc/clickhouse-server/users.d
@@ -152,18 +149,3 @@ configs:
       spark.history.fs.logDirectory             /home/iceberg/spark-events
       spark.sql.catalogImplementation           in-memory
       # spark.log.level                         DEBUG
-  clickhouse-init:
-    content: |
-      #!/bin/bash
-      exec clickhouse client --query $"
-        SET allow_experimental_database_iceberg = 1;
-
-        DROP DATABASE IF EXISTS ice;
-
-        CREATE DATABASE ice
-          ENGINE = DataLakeCatalog('http://ice-rest-catalog:5000')
-          SETTINGS catalog_type = 'rest',
-            auth_header = 'Authorization: Bearer foo',
-            storage_endpoint = 'http://minio:9000',
-            warehouse = 's3://warehouse';
-      "
