@@ -60,6 +60,7 @@ module "eks_clickhouse" {
       max_size      = 20
       min_size      = 0
       zones         = ["${local.region}a"]
+      #zones         = ["${local.region}a", "${local.region}b"]
       # zones         = ["${local.region}a", "${local.region}b", "${local.region}c"]
       taints        = [{
          key    = "antalya"

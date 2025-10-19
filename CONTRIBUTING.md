@@ -9,8 +9,9 @@ We gladly accept PRs and issues to improve this project.
 2. Format files in accordance with the language 
 conventions. 
 3. Include tests. If there are existing tests extend them with new cases. Otherwise create automated tests. 
-4. Keep documentation current. Update README.md files where needed to describe new behavior. 
-5. Place Apache 2.0 header comments in Python files. 
+4. Keep documentation current. Update README.md files to describe new behavior and remove obsolete instructions. 
+5. Keep documentation concise. Provide only essential information and commands needed to complete tasks.
+6. Place Apache 2.0 header comments in Python files. 
 
 ## Testing Conventions
 
@@ -24,4 +25,8 @@ conventions.
 
 Feel free to use AI tools but add this file to the context by telling
 your AI agent to follow these rules for design and code gen activities.
+
+1. AI agents are required to read and follow these conventions. 
+2. Developers are required to verify all code, including code generated
+by AI agents. 
 

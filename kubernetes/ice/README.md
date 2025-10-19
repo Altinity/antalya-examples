@@ -106,6 +106,36 @@ kubectl -n antalya exec -it ice-rest-catalog-0 -- ice insert btc.transactions \
  's3://aws-public-blockchain/v1.0/btc/transactions/date=2025-0*-*/*.parquet'
 ```
 
+## Adding an SQS notification queue for the S3 bucket. 
+
+Use Terraform to add an SQS queue that receives S3 notifications when new .parquet files are created.
+
+```bash
+# Use the same CATALOG_BUCKET value from the previous section
+export TF_VAR_catalog_bucket=$CATALOG_BUCKET
+
+terraform init
+terraform apply
+```
+
+Note the BUCKET and SQS queue URL from the output for configuring the ice command to auto-load 
+new files in SQL to a table. 
+```
+echo $"
+export CATALOG_BUCKET=$(terraform output -raw s3_bucket_name)
+export CATALOG_SQS_QUEUE_URL=$(terraform output -raw sqs_queue_url)
+" > tf.export
+
+. tf.export
+```
+
+You can now use the bucket and catalog names in ice commands like the following: 
+```
+ice insert blog.tripdata_watch -p --force-no-copy --skip-duplicates \
+  "s3://$CATALOG_BUCKET/ICE_WATCH/blog/tripdata_watch/*.parquet"\
+  --watch="$CATALOG_SQS_QUEUE_URL" 
+```
+
 ## Connecting ClickHouse to the ice catalog. 
 
 Issue SQL commands to connect to the Ice catalog. Adjust the string in the warehouse setting to 
@@ -134,4 +164,4 @@ The last command should show the tables you just added.
 
 The ice toolset is pretty easy to set up. If you run into trouble it's likely something
 to do with AWS IAM. For more hints check out the ice 
-[examples/eks/README.md](https://github.com/Altinity/ice/tree/master/examples/eks#readme). 
+[examples/eks/README.md](https://github.com/Altinity/ice/tree/master/examples/eks#readme).

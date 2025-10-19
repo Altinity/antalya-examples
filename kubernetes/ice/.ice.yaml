@@ -1,0 +1,4 @@
+# Endpoint must be a bucket id. 
+uri: http://localhost:5000
+bearerToken: foo
+httpCacheDir: var/cache/ice/http

@@ -69,7 +69,7 @@ kubectl apply -f vector.yaml
 
 #### Using helm
 
-The helm script is in the helm directory. 
+The helm script is in the helm directory. It's under development. 
 
 ## Running
 
