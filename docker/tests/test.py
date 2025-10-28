@@ -40,8 +40,8 @@ class DockerTestFramework(unittest.TestCase):
             cls._docker_helper.cleanup_services()
 
     def test_ice_catalog_liveness(self):
-        """Confirm ice catalog on 5001 can list namespaces"""
-        http_get_helper(self, "http://localhost:5001/v1/namespaces", auth_header="Bearer foo")
+        """Confirm ice catalog on 5000 can list namespaces"""
+        http_get_helper(self, "http://localhost:5000/v1/namespaces", auth_header="Bearer foo")
 
     def test_vector_server_liveness(self):
         """Confirm ClickHouse vector server responds to ping"""

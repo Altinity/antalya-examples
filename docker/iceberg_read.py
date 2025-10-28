@@ -14,7 +14,7 @@ print("Connect to the catalog")
 catalog = load_catalog(
     "rest", 
     **{
-        "uri": "http://localhost:5001/",  # REST server URL. 
+        "uri": "http://localhost:5000/",  # REST server URL. 
         "type": "rest",
         "token": "foo",
         "s3.endpoint": f"http://localhost:9002",  # Minio URI and credentials

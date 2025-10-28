@@ -236,15 +236,15 @@ are a few examples that you can try on this project.
 
 Find namespaces. 
 ```
-curl -H "Authorization: bearer foo" http://localhost:5001/v1/namespaces | jq -s
+curl -H "Authorization: bearer foo" http://localhost:5000/v1/namespaces | jq -s
 ```
 
 Find tables in namespace. 
 ```
-curl -H "Authorization: bearer foo" http://localhost:5001/v1/namespaces/iceberg/tables | jq -s
+curl -H "Authorization: bearer foo" http://localhost:5000/v1/namespaces/iceberg/tables | jq -s
 ```
 
 Find table spec in Iceberg. 
 ```
-curl -H "Authorization: bearer foo" http://localhost:5001/v1/namespaces/iceberg/tables/bids | jq -s
+curl -H "Authorization: bearer foo" http://localhost:5000/v1/namespaces/iceberg/tables/bids | jq -s
 ```
