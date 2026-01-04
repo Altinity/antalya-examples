@@ -4,17 +4,23 @@
 set -e
 
 # Parse command line arguments
-USE_EXISTING=false
+MANAGE_DOCKER=false
+TEST_PROFILE="docker"
 for arg in "$@"; do
     case $arg in
-        --use-existing)
-            USE_EXISTING=true
+        --manage-docker)
+            MANAGE_DOCKER=true
+            shift
+            ;;
+        --profile=*)
+            TEST_PROFILE="${arg#*=}"
             shift
             ;;
         *)
             # Unknown option
-            echo "Usage: $0 [--use-existing]"
-            echo "  --use-existing  Use existing Docker Compose setup instead of starting/stopping services"
+            echo "Usage: $0 [--manage-docker] [--profile=docker|kubernetes]"
+            echo "  --manage-docker  Start/stop Docker Compose services (default: use existing setup)"
+            echo "  --profile        Test profile to use (default: docker)"
             exit 1
             ;;
     esac
@@ -39,14 +45,14 @@ echo "Installing dependencies..."
 pip install -r ../requirements.txt
 pip install -r test-requirements.txt
 
-# Set environment variable if using existing setup
-if $USE_EXISTING; then
-    echo "Using existing Docker Compose setup..."
-    export SKIP_DOCKER_SETUP=true
+# Set environment variables
+export TEST_PROFILE
+if $MANAGE_DOCKER; then
+    export MANAGE_DOCKER=true
 fi
 
 # Run tests
-echo "Running tests..."
+echo "Running tests with profile: $TEST_PROFILE"
 python test.py
 
 echo "Tests completed."

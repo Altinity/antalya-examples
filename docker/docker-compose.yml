@@ -3,7 +3,7 @@ services:
     depends_on:
       - minio-init
       - keeper
-    image: altinity/clickhouse-server:25.8.9.20238.altinityantalya
+    image: altinity/clickhouse-server:25.8.9.20496.altinityantalya
     container_name: vector
     hostname: vector
     ports:
@@ -19,7 +19,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=minio123
       - AWS_REGION=minio
   keeper:
-    image: altinity/clickhouse-keeper:25.8.9.20238.altinityantalya
+    image: altinity/clickhouse-keeper:25.8.9.20496.altinityantalya
     container_name: keeper
     hostname: keeper
     ports:
@@ -30,7 +30,7 @@ services:
       - ./data/keeper/log:/var/log/clickhouse-keeper
       - ./data/keeper/keeper:/var/lib/keeper
   swarm-1:
-    image: altinity/clickhouse-server:25.8.9.20238.altinityantalya
+    image: altinity/clickhouse-server:25.8.9.20496.altinityantalya
     container_name: swarm-1
     hostname: swarm-1
     volumes:
@@ -43,7 +43,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=minio123
       - AWS_REGION=minio
   swarm-2:
-    image: altinity/clickhouse-server:25.8.9.20238.altinityantalya
+    image: altinity/clickhouse-server:25.8.9.20496.altinityantalya
     container_name: swarm-2
     hostname: swarm-2
     volumes:

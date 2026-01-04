@@ -5,8 +5,6 @@
 #import sys
 #print(sys.path)
 
-import pyarrow
-import pyiceberg
 # Allows us to connect to the catalog. 
 from pyiceberg.catalog import load_catalog
 

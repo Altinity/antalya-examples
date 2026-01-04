@@ -1,5 +1,7 @@
-# Used in tests. 
+# Used in tests.
 requests==2.31.0
+clickhouse-driver==0.2.9
+pyyaml==6.0.2
 # Code formatting.
 black==25.9.0
 flake8==7.3.0

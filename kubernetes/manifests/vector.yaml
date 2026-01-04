@@ -43,7 +43,7 @@ spec:
             node.kubernetes.io/instance-type: m6i.large
           containers:
           - name: clickhouse
-            image: altinity/clickhouse-server:25.8.9.20207.altinityantalya
+            image: altinity/clickhouse-server:25.8.9.20496.altinityantalya
           tolerations:
           - key: "dedicated"
             operator: "Equal"

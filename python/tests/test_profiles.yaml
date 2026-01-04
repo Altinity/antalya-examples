@@ -1,0 +1,27 @@
+# Use this for docker.
+docker:
+  ch_host: localhost
+  ch_port: 9000
+  ch_user: root
+  ch_password: topsecret
+  ice_rest_host: localhost
+  ice_rest_port: 5000
+  ice_config: "cfg-docker.ice.yaml"
+  ice_setting_auth_header: "Authorization: Bearer foo"
+  ice_setting_storage_endpoint: "http://minio:9000"
+  ice_setting_warehouse: "s3://warehouse"
+  use_docker: True
+
+# Use this for kubernetes.
+kubernetes:
+  ch_host: localhost
+  ch_port: 9000
+  ch_user: default
+  ch_password: ""
+  ice_rest_host: localhost
+  ice_rest_port: 5000
+  ice_config: "cfg-kubernetes.ice.yaml"
+  ice_setting_auth_header: "Authorization: Bearer foo"
+  ice_setting_storage_endpoint: null
+  ice_setting_warehouse: "Any value will do"
+  use_docker: False

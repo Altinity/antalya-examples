@@ -12,6 +12,7 @@ conventions.
 4. Keep documentation current. Update README.md files to describe new behavior and remove obsolete instructions. 
 5. Keep documentation concise. Provide only essential information and commands needed to complete tasks.
 6. Place Apache 2.0 header comments in Python files. 
+7. Validate all Python code using `black . && isort . && flake8 .`
 
 ## Testing Conventions
 

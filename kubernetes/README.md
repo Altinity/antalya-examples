@@ -160,7 +160,7 @@ CREATE DATABASE ice
   ENGINE = DataLakeCatalog('http://ice-rest-catalog:5000')
   SETTINGS catalog_type = 'rest',
     auth_header = 'Authorization: Bearer foo',
-    warehouse = 's3://rhodges-ice-rest-catalog-demo}';
+    warehouse = 's3://myusername-ice-rest-catalog-demo';
 
 -- Use this for Antalya 25.2 or below. 
 CREATE DATABASE ice

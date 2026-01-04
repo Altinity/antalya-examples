@@ -64,7 +64,7 @@ spec:
                 type: DirectoryOrCreate
           containers:
           - name: clickhouse
-            image: altinity/clickhouse-server:24.12.2.20203.altinityantalya
+            image: altinity/clickhouse-server:25.8.9.20496.altinityantalya
             volumeMounts:
               # Specify reference to volume on local filesystem
               - name: local-path
