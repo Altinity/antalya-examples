@@ -60,7 +60,7 @@ Cd to the manifests directory and install the manifests in the default
 namespace. 
 
 ```
-cd manifest
+cd manifests
 kubectl apply -f gp3-encrypted-fast-storage-class.yaml
 kubectl apply -f keeper.yaml
 kubectl apply -f swarm.yaml
