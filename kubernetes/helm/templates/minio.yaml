@@ -1,0 +1,125 @@
+{{- if .Values.minio.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minio
+  labels:
+    app.kubernetes.io/name: minio
+spec:
+  serviceName: minio-headless
+  replicas: {{ .Values.minio.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: minio
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: minio
+    spec:
+      containers:
+        - name: minio
+          image: {{ .Values.minio.image.repository }}:{{ .Values.minio.image.tag }}
+          args:
+            - server
+            - /data
+            - --console-address
+            - ":9001"
+          env:
+            - name: MINIO_ROOT_USER
+              value: {{ .Values.minio.rootUser }}
+            - name: MINIO_ROOT_PASSWORD
+              value: {{ .Values.minio.rootPassword }}
+            - name: MINIO_DOMAIN
+              value: minio
+          ports:
+            - containerPort: 9000
+            - containerPort: 9001
+          volumeMounts:
+            - name: minio-data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /minio/health/live
+              port: 9000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /minio/health/ready
+              port: 9000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+  volumeClaimTemplates:
+    - metadata:
+        name: minio-data
+        labels:
+          app.kubernetes.io/name: minio
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  labels:
+    app.kubernetes.io/name: minio
+spec:
+  type: NodePort
+  ports:
+    - name: api
+      port: 9000
+      targetPort: 9000
+    - name: console
+      port: 9001
+      targetPort: 9001
+  selector:
+    app.kubernetes.io/name: minio
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-headless
+  labels:
+    app.kubernetes.io/name: minio
+spec:
+  clusterIP: None
+  ports:
+    - name: api
+      port: 9000
+      targetPort: 9000
+  selector:
+    app.kubernetes.io/name: minio
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: minio-init
+spec:
+  backoffLimit: 5
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: mc
+          image: minio/mc:RELEASE.2025-03-12T17-29-24Z
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              value: {{ .Values.minio.rootUser }}
+            - name: AWS_SECRET_ACCESS_KEY
+              value: {{ .Values.minio.rootPassword }}
+            - name: AWS_REGION
+              value: {{ .Values.minio.awsRegion }}
+          command:
+            - /bin/sh
+            - -c
+            - >
+              until (/usr/bin/mc alias set minio http://minio:9000 {{ .Values.minio.rootUser }} {{ .Values.minio.rootPassword }}); do echo '...waiting...' && sleep 1; done;
+              /usr/bin/mc mb minio/warehouse --ignore-existing;
+              /usr/bin/mc anonymous set public minio/warehouse;
+{{- end }}

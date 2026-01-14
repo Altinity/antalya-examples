@@ -1,0 +1,142 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ice-rest-catalog-etcd
+  labels:
+    app: ice-rest-catalog-etcd
+spec:
+  replicas: 1 # change to 3
+  selector:
+    matchLabels:
+      app: ice-rest-catalog-etcd
+  serviceName: ice-rest-catalog-etcd
+  template:
+    metadata:
+      name: ice-rest-catalog-etcd
+      labels:
+        app: ice-rest-catalog-etcd
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "2381"
+    spec:
+      containers:
+        - name: etcd
+          image: quay.io/coreos/etcd:v3.5.4
+          ports:
+            - containerPort: 2379
+              name: client
+            - containerPort: 2380
+              name: peer
+            - containerPort: 2381
+              name: metrics
+          volumeMounts:
+            - name: data
+              mountPath: /var/run/etcd
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: ETCD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: ETCD_LISTEN_PEER_URLS
+              value: http://0.0.0.0:2380
+            - name: ETCD_INITIAL_ADVERTISE_PEER_URLS
+              value: http://$(ETCD_NAME).ice-rest-catalog-etcd.$(NAMESPACE).svc.cluster.local:2380
+            - name: ETCD_LISTEN_CLIENT_URLS
+              value: http://0.0.0.0:2379
+            - name: ETCD_ADVERTISE_CLIENT_URLS
+              value: http://$(ETCD_NAME).ice-rest-catalog-etcd.$(NAMESPACE).svc.cluster.local:2379
+            - name: ETCD_INITIAL_CLUSTER_TOKEN
+              value: ice-rest-catalog-etcd
+            - name: ETCD_INITIAL_CLUSTER
+              value: ice-rest-catalog-etcd-0=http://ice-rest-catalog-etcd-0.ice-rest-catalog-etcd.$(NAMESPACE).svc.cluster.local:2380
+              # replace with if you change number of replicas to 3
+              # value: ice-rest-catalog-etcd-0=http://ice-rest-catalog-etcd-0.ice-rest-catalog-etcd:2380,ice-rest-catalog-etcd-1=http://ice-rest-catalog-etcd-1.ice-rest-catalog-etcd:2380,ice-rest-catalog-etcd-2=http://ice-rest-catalog-etcd-2.ice-rest-catalog-etcd:2380
+            - name: ETCD_INITIAL_CLUSTER_STATE
+              valueFrom:
+                configMapKeyRef:
+                  name: ice-rest-catalog-etcd
+                  key: ETCD_INITIAL_CLUSTER_STATE
+            - name: ETCD_LISTEN_METRICS_URLS
+              value: http://0.0.0.0:2381
+            - name: ETCD_DATA_DIR
+              value: /var/run/etcd/ice-rest-catalog.etcd
+            - name: ETCD_QUOTA_BACKEND_BYTES
+              value: "8589934592" # 8Gi
+            - name: ETCD_AUTO_COMPACTION_RETENTION
+              value: "1"
+          livenessProbe:
+            failureThreshold: 8
+            httpGet:
+              path: /health
+              port: 2381
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 15
+          startupProbe:
+            failureThreshold: 24
+            httpGet:
+              path: /health
+              port: 2381
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 15
+      affinity:
+        # explanation: put pods in different AZs
+        podAntiAffinity:
+          # change to requiredDuringSchedulingIgnoredDuringExecution if needed (note: you'll need to remove podAffinityTerm/weight)
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: ice-rest-catalog-etcd
+                topologyKey: topology.kubernetes.io/zone
+              weight: 100
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        storageClassName: {{ if .Values.etcd.storage.class }}{{ .Values.etcd.storage.class }}{{ else }}{{ .Values.global.storageClass }}{{ end }}
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ice-rest-catalog-etcd
+spec:
+  clusterIP: None
+  ports:
+    - port: 2379
+      name: client
+    - port: 2380
+      name: peer
+    - port: 2381
+      name: metrics
+  selector:
+    app: ice-rest-catalog-etcd
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ice-rest-catalog-etcd
+data:
+  ETCD_INITIAL_CLUSTER_STATE: "new"
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ice-rest-catalog-etcd
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: ice-rest-catalog-etcd

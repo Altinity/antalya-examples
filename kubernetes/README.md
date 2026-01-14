@@ -60,7 +60,7 @@ Cd to the manifests directory and install the manifests in the default
 namespace. 
 
 ```
-cd manifest
+cd manifests
 kubectl apply -f gp3-encrypted-fast-storage-class.yaml
 kubectl apply -f keeper.yaml
 kubectl apply -f swarm.yaml
@@ -69,7 +69,27 @@ kubectl apply -f vector.yaml
 
 #### Using helm
 
-The helm script is in the helm directory. It's under development. 
+The helm script is in the helm directory. It's under development.
+
+In the `helm` directory, run the following to install the helm chart:
+
+```shell
+helm install antalya-test ./
+```
+
+On Minikube, run:
+
+```shell
+helm install antalya-test ./ -f values-minikube.yaml
+```
+
+This will deploy MinIO for local object storage.
+
+To uninstall, run:
+
+```shell
+helm uninstall antalya-test
+```
 
 ## Running
 

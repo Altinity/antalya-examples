@@ -12,7 +12,6 @@ spec:
               podTemplate: replica
               volumeClaimTemplate: storage
           shardsCount: {{ .Values.vector.shardsCount }}
-        templates:
     zookeeper:
         nodes:
         - host: keeper-keeper

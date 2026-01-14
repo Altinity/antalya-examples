@@ -80,7 +80,7 @@ spec:
                   topologyKey: "kubernetes.io/hostname"
           containers:
           - name: clickhouse
-            image: altinity/clickhouse-server:25.8.9.20496.altinityantalya
+            image: altinity/clickhouse-server:25.8.12.20747.altinityantalya
     volumeClaimTemplates:
       - name: storage
         # Uncomment for prod systems. You will then need to delete PVCs manually. 

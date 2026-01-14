@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ice-rest-catalog
+stringData:
+  ice-rest-catalog.yaml: |
+    # uri: jdbc:sqlite:file:/var/lib/ice-rest-catalog/db.sqlite?journal_mode=WAL&synchronous=OFF&journal_size_limit=500
+    uri: etcd:http://ice-rest-catalog-etcd:2379
+    warehouse: s3://{{ .Values.iceRestCatalog.catalogBucket }}
+    s3:
+      endpoint: {{ .Values.iceRestCatalog.s3.endpoint }}
+      pathStyleAccess: true
+      accessKeyID: {{ .Values.iceRestCatalog.s3.accessKeyID }}
+      secretAccessKey: {{ .Values.iceRestCatalog.s3.secretAccessKey }}
+      region: {{ .Values.iceRestCatalog.s3.region }}
+    bearerTokens:
+    - value: foo
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ice-rest-catalog
+spec:
+  selector:
+    app: ice-rest-catalog
+  ports:
+    - port: 5000
+      name: iceberg
+    - port: 5001
+      name: debug
+---
+# this can be a simple Deployment without volumes when uri is ectd:...
+# keeping it StatefulSet for testing purposes only
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ice-rest-catalog
+  labels:
+    app: ice-rest-catalog
+spec:
+  serviceName: ice-rest-catalog
+  selector:
+    matchLabels:
+      app: ice-rest-catalog
+  template:
+    metadata:
+      labels:
+        app: ice-rest-catalog
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5001"
+    spec:
+      volumes:
+        - name: etc
+          secret:
+            secretName: ice-rest-catalog
+      containers:
+        - name: iceberg
+          # image: altinity/ice-rest-catalog:latest
+          image: altinity/ice-rest-catalog:debug-with-ice-0.0.0-SNAPSHOT
+          imagePullPolicy: "Always" # for test purposes only
+          ports:
+            - containerPort: 5000 # iceberg
+            - containerPort: 5001 # /{healthz,livez,readyz,metrics}
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 5001
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: 5001
+            initialDelaySeconds: 60
+            timeoutSeconds: 10
+          volumeMounts:
+            - name: etc
+              mountPath: /etc/ice
+              readOnly: true
+            - name: data
+              mountPath: /var/lib/ice-rest-catalog
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        storageClassName: {{ if .Values.iceRestCatalog.storage.class }}{{ .Values.iceRestCatalog.storage.class }}{{ else }}{{ .Values.global.storageClass }}{{ end }}
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi

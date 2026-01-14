@@ -1,6 +1,6 @@
 # Global settings
 global:
-  storageClass: "gp3-encrypted"
+  storageClass: "standard"
 
 # ClickHouse Keeper settings
 keeper:
@@ -8,7 +8,7 @@ keeper:
   replicasCount: 3
   storage:
     class: ""  # Defaults to global.storageClass if empty
-    size: "25Gi"
+    size: "5Gi"
   image:
     repository: "altinity/clickhouse-keeper"
     tag: "25.8.12.20747.altinityantalya"
@@ -22,9 +22,8 @@ vector:
     count: 1
     storage:
       class: ""  # Defaults to global.storageClass if empty
-      size: "50Gi"
+      size: "10Gi"
     nodeSelector:
-      "node.kubernetes.io/instance-type": "m6i.large"
     tolerations:
       - key: "dedicated"
         operator: "Equal"
@@ -42,9 +41,8 @@ swarm:
     count: 1
     storage:
       class: ""  # Defaults to global.storageClass if empty
-      size: "50Gi"
+      size: "10Gi"
     nodeSelector:
-      "node.kubernetes.io/instance-type": "m6i.xlarge"
     tolerations:
       - key: "antalya"
         operator: "Equal"
@@ -55,27 +53,18 @@ swarm:
         value: "clickhouse"
         effect: "NoSchedule"
     affinity:
-      podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-                - key: "clickhouse.altinity.com/app"
-                  operator: In
-                  values:
-                    - "chop"
-            topologyKey: "kubernetes.io/hostname"
   image:
     repository: "altinity/clickhouse-server"
     tag: "25.8.12.20747.altinityantalya"
 
 # Ice Rest Catalog settings
 iceRestCatalog:
-  catalogBucket: bucket1
+  catalogBucket: warehouse
   s3:
-    endpoint: ""
-    accessKeyID: ""
-    secretAccessKey: ""
-    region: us-east-1
+    endpoint: "http://minio:9000"
+    accessKeyID: minio
+    secretAccessKey: minio123
+    region: minio
   storage:
     class: "" # Defaults to global.storageClass if empty
 
@@ -85,4 +74,11 @@ etcd:
     class: "" # Defaults to global.storageClass if empty
 
 minio:
-  enabled: false
+  enabled: true
+  rootUser: minio
+  rootPassword: minio123
+  awsRegion: minio
+  image:
+    repository: quay.io/minio/minio
+    tag: RELEASE.2025-03-12T18-04-18Z
+  replicas: 1
